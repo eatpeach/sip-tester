@@ -474,8 +474,11 @@ class App:
         m = RE_SUMMARY.search(line)
         if m:
             g = m.groups()
+            setup_ms = int(g[0])
+            if setup_ms < 0 or setup_ms > 3600000:
+                setup_ms = None  # 未接通时 baresip 给的是无效值
             self._merge_call({'summary': {
-                'setup_ms': int(g[0]), 'duration_s': int(g[1]),
+                'setup_ms': setup_ms, 'duration_s': int(g[1]),
                 'rx_packets': int(g[2]), 'tx_packets': int(g[3]),
                 'rx_lost': int(g[4]), 'tx_lost': int(g[5]),
                 'rx_discard': int(g[6]), 'tx_discard': int(g[7]),

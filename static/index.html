@@ -313,7 +313,7 @@ function renderStats(){
   let note = '';
   if (c.state === 'established' && m.noRtcp && c.t_est && (Date.now()/1000 - clockSkew - c.t_est) > 12) note = '对端尚未发送 RTCP 报告：RTT / 对端侧指标不可用，丢包以本地抖动缓冲统计为准。';
   if (c.state === 'closed' && c.summary && c.summary.no_rtcp) note = '本次通话对端未发送 RTCP，仅有本地统计。';
-  if (c.state === 'closed' && c.summary && !c.summary.no_rtcp) note = `RTCP 汇总：建立 ${c.summary.setup_ms} ms · 时长 ${c.summary.duration_s} s · 收 ${c.summary.rx_packets} 丢 ${c.summary.rx_lost} · 发 ${c.summary.tx_packets} 丢 ${c.summary.tx_lost} · 抖动 ${c.summary.rx_jit_ms}/${c.summary.tx_jit_ms} ms · RTT ${c.summary.rtt_ms} ms · ${c.summary.local} ⇄ ${c.summary.remote}`;
+  if (c.state === 'closed' && c.summary && !c.summary.no_rtcp) note = `RTCP 汇总：${c.summary.setup_ms != null ? '建立 ' + c.summary.setup_ms + ' ms · ' : ''}时长 ${c.summary.duration_s} s · 收 ${c.summary.rx_packets} 丢 ${c.summary.rx_lost} · 发 ${c.summary.tx_packets} 丢 ${c.summary.tx_lost} · 抖动 ${c.summary.rx_jit_ms}/${c.summary.tx_jit_ms} ms · RTT ${c.summary.rtt_ms} ms · ${c.summary.local} ⇄ ${c.summary.remote}`;
   $('#rtcpNote').textContent = note;
   $('#diag').textContent = state.diag || '';
   $('#statsTs').textContent = stats && stats.ts ? '更新于 ' + new Date(stats.ts*1000).toLocaleTimeString() : '';
