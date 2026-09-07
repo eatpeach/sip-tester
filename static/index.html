@@ -21,6 +21,8 @@ label.f{display:block;margin-bottom:8px;font-size:12px;color:var(--muted)}
 label.f input[type=text],label.f input[type=password],label.f input[type=number],label.f select{display:block;width:100%;margin-top:3px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;color:var(--txt);background:#fff}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px;margin:6px 0}
+.chk.dim{color:var(--muted);font-size:12px;margin:12px 0 0;padding-top:8px;border-top:1px dashed var(--line);opacity:.75}
+.chk.dim input{accent-color:#9ca3af}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
 button{border:1px solid var(--line);background:#fff;color:var(--txt);border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer}
 button:hover{background:#f7f8fa}
@@ -84,7 +86,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:12px}
       <label class="f">传输<select id="c_transport"><option value="udp">UDP</option><option value="tcp">TCP</option><option value="tls">TLS</option></select></label>
       <label class="f">编解码<select id="c_codec"><option value="pcma">PCMA 优先 (G.711a)</option><option value="pcmu">PCMU 优先 (G.711u)</option><option value="pcma_only">仅 PCMA</option><option value="pcmu_only">仅 PCMU</option></select></label>
     </div>
-    <label class="chk"><input type="checkbox" id="c_register" checked> 注册 (REGISTER)；IP 鉴权线路取消勾选</label>
     <label class="chk"><input type="checkbox" id="c_stun"> 启用 STUN <input type="text" id="c_stun_server" placeholder="stun.l.google.com:19302" style="flex:1;padding:3px 6px;border:1px solid var(--line);border-radius:5px;font-size:12px"></label>
     <label class="chk"><input type="checkbox" id="c_sip_trace"> SIP 信令跟踪 (日志里打印完整 SIP 报文)</label>
     <details><summary>高级</summary>
@@ -99,6 +100,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:12px}
     </div>
     <div class="err" id="connErr"></div>
     <div class="hint">配置保存在浏览器本地。音频使用 macOS 系统默认麦克风 / 扬声器，首次通话时系统会弹出麦克风授权。</div>
+    <label class="chk dim"><input type="checkbox" id="c_register" checked> 注册 (REGISTER)；IP 鉴权线路取消勾选</label>
   </section>
 
   <section class="card">

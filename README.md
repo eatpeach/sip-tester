@@ -14,6 +14,15 @@
 
 **请在自己的终端里启动**（不要在 IDE 的隐藏终端里）：首次通话 macOS 会向启动它的终端 App 弹「麦克风」授权，拒绝或没弹出来就会单向无声。
 
+## 分享给同事
+
+```bash
+git clone https://github.com/eatpeach/sip-tester.git
+cd sip-tester && ./run.sh
+```
+
+要求 macOS + Homebrew（`run.sh` 会自动装 baresip），不支持 Windows。IP 鉴权线路只认白名单里的出口 IP，同事不在同一个办公网时，要让线路商把他们的出口 IP 也加白。
+
 ## 使用
 
 1. 左侧填线路给的：服务器地址（`host` 或 `host:port`）、用户名、密码；认证用户名 / 域与用户名 / 服务器不同时才填。
