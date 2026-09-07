@@ -308,7 +308,7 @@ function renderStats(){
     ['编解码', m.codec || '—', ''],
     ['振铃时延 (PDD)', fms(c.pdd_ms), c.pdd_ms > 6000 ? 'b' : c.pdd_ms > 3000 ? 'm' : ''],
     ['接通时延', fms(c.answer_ms), ''],
-    ['首包 RTP', c.t_rtp && c.t_est ? fms((c.t_rtp - c.t_est)*1000) + ' (接通后)' : (c.t_rtp && c.t_start ? fms((c.t_rtp - c.t_start)*1000) + ' (拨出后)' : '—'), ''],
+    ['首包 RTP', !c.t_rtp ? '—' : (c.t_est && c.t_rtp >= c.t_est ? fms((c.t_rtp - c.t_est)*1000) + ' (接通后)' : fms((c.t_rtp - c.t_start)*1000) + ' (拨出后，早期媒体)'), ''],
     ['早期媒体', c.early_media ? '有 (183)' : '无', ''],
   ];
   kv.innerHTML = items.map(([k,v,cls]) => `<div><div class="k">${k}</div><div class="n ${cls}">${v}</div></div>`).join('');
