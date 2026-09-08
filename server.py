@@ -762,6 +762,17 @@ class App:
 app = App()
 
 
+class Server(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        # 浏览器预连接 / keep-alive 提前断开会抛 ConnectionReset，属正常噪音，不打堆栈
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, BrokenPipeError)):
+            return
+        super().handle_error(request, client_address)
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = 'sip-tester/1.0'
 
@@ -870,7 +881,7 @@ def main():
     args = ap.parse_args()
     if not app.exe:
         print('未找到 baresip，请先执行: brew install baresip', file=sys.stderr)
-    srv = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
+    srv = Server(('127.0.0.1', args.port), Handler)
 
     def _term(signum, frame):
         app.stop()
