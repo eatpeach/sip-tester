@@ -34,6 +34,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE, 'static')
 RUNTIME_DIR = os.path.join(BASE, 'runtime')
 HISTORY_FILE = os.path.join(RUNTIME_DIR, 'history.json')
+PROFILES_FILE = os.path.join(RUNTIME_DIR, 'profiles.json')  # 预设账号（含密码明文，不入库）
 CTRL_ADDR = ('127.0.0.1', 4490)
 LOG_KEEP = 600
 HISTORY_KEEP = 200
@@ -253,6 +254,36 @@ class App:
                 json.dump(self.history, f, ensure_ascii=False)
         except Exception as e:
             self.add_log('保存历史失败: %s' % e, 'err')
+
+    # ---------- 预设账号 ----------
+    def profiles(self):
+        try:
+            with open(PROFILES_FILE, encoding='utf-8') as f:
+                data = json.load(f)
+            return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    def _save_profiles(self, items):
+        os.makedirs(RUNTIME_DIR, exist_ok=True)
+        with open(PROFILES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(items, f, ensure_ascii=False, indent=1)
+
+    def save_profile(self, name, cfg):
+        name = (name or '').strip()
+        if not name or not isinstance(cfg, dict):
+            return {'ok': False, 'error': '预设名称为空'}
+        with self.lock:
+            items = [p for p in self.profiles() if p.get('name') != name]
+            items.append({'name': name, 'cfg': cfg})
+            self._save_profiles(items)
+        return {'ok': True, 'profiles': items}
+
+    def delete_profile(self, name):
+        with self.lock:
+            items = [p for p in self.profiles() if p.get('name') != name]
+            self._save_profiles(items)
+        return {'ok': True, 'profiles': items}
 
     def clear_history(self):
         with self.lock:
@@ -772,6 +803,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(app.snapshot())
         elif p == '/api/history':
             self._json(app.history)
+        elif p == '/api/profiles':
+            self._json(app.profiles())
         elif p == '/api/log':
             self._json(list(app.log))
         elif p == '/api/events':
@@ -798,6 +831,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(app.mute(bool(b.get('on'))))
         if p == '/api/cmd':
             return self._json(app.raw(b.get('command', ''), b.get('params', '')))
+        if p == '/api/profiles':
+            return self._json(app.save_profile(b.get('name'), b.get('cfg')))
+        if p == '/api/profiles/delete':
+            return self._json(app.delete_profile(b.get('name', '')))
         if p == '/api/history/clear':
             app.clear_history()
             return self._json({'ok': True})

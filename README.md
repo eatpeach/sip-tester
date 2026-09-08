@@ -44,7 +44,7 @@ cd sip-tester && ./run.sh
 
 - `server.py`：HTTP + SSE 接口，生成 `runtime/config` `runtime/accounts`，拉起 baresip 并通过 `ctrl_tcp`（127.0.0.1:4490）收发 JSON 命令 / 事件
 - `static/index.html`：拨号面板
-- `runtime/`：运行时生成（含账号密码明文与通话记录 `history.json`），已 gitignore
+- `runtime/`：运行时生成，已 gitignore：baresip 配置（含密码明文）、通话记录 `history.json`、预设账号 `profiles.json`（面板里「保存预设 / 删除」维护，密码明文，不要提交）
 
 ## 限制
 

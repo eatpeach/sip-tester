@@ -73,6 +73,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:12px}
 <main>
   <section class="card">
     <h2>SIP 账号</h2>
+    <div class="row" style="margin:0 0 10px">
+      <select id="profileSel" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#fff"><option value="">— 选择预设账号 —</option></select>
+      <button id="btnProfSave" title="把当前表单内容保存为预设">保存预设</button>
+      <button id="btnProfDel" title="删除选中的预设">删除</button>
+    </div>
     <label class="f">服务器地址 <span class="muted">(host 或 host:port)</span><input type="text" id="c_server" placeholder="sip.example.com:5060"></label>
     <div class="two">
       <label class="f">用户名 / 号码<input type="text" id="c_user" placeholder="1001"></label>
@@ -167,6 +172,40 @@ function loadCfg(){
   }catch(e){}
 }
 function saveCfg(){ try{ localStorage.setItem('sipTester.cfg', JSON.stringify(readCfg())); }catch(e){} }
+function applyCfg(c){
+  for (const k of CFG_KEYS){ const el=$('#c_'+k); if(!el||c[k]===undefined) continue; if(el.type==='checkbox') el.checked=!!c[k]; else el.value=c[k]; }
+}
+
+// ---------- 预设账号（存在 runtime/profiles.json） ----------
+let profiles = [];
+function renderProfiles(){
+  const sel = $('#profileSel');
+  const cur = sel.value || localStorage.getItem('sipTester.profile') || '';
+  sel.innerHTML = '<option value="">— 选择预设账号 —</option>' + profiles.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)} · ${escapeHtml(p.cfg.user||'')}@${escapeHtml(p.cfg.server||'')}</option>`).join('');
+  sel.value = profiles.some(p => p.name === cur) ? cur : '';
+  $('#btnProfDel').disabled = !sel.value;
+}
+async function loadProfiles(){ try{ profiles = await (await fetch('/api/profiles')).json(); }catch(e){ profiles = []; } renderProfiles(); }
+$('#profileSel').addEventListener('change', () => {
+  const p = profiles.find(x => x.name === $('#profileSel').value);
+  $('#btnProfDel').disabled = !p;
+  if (!p) return;
+  applyCfg(p.cfg); saveCfg(); localStorage.setItem('sipTester.profile', p.name);
+});
+$('#btnProfSave').addEventListener('click', async () => {
+  const cur = $('#profileSel').value;
+  const name = prompt('预设名称', cur || (($('#c_user').value || '账号') + ' @ ' + $('#c_server').value));
+  if (!name || !name.trim()) return;
+  const r = await api('/api/profiles', {name: name.trim(), cfg: readCfg()});
+  if (!r.ok) { alert(r.error || '保存失败'); return; }
+  profiles = r.profiles; localStorage.setItem('sipTester.profile', name.trim()); $('#profileSel').value = ''; renderProfiles();
+});
+$('#btnProfDel').addEventListener('click', async () => {
+  const cur = $('#profileSel').value; if (!cur) return;
+  if (!confirm(`删除预设「${cur}」？`)) return;
+  const r = await api('/api/profiles/delete', {name: cur});
+  profiles = r.profiles || []; localStorage.removeItem('sipTester.profile'); $('#profileSel').value = ''; renderProfiles();
+});
 
 async function api(path, body){
   const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{})});
@@ -376,6 +415,7 @@ function connectSse(){
   es.onerror = () => { es.close(); setTimeout(connectSse, 2000); };
 }
 loadCfg();
+loadProfiles();
 fetch('/api/history').then(r => r.json()).then(h => { history = h; renderHistory(); renderRecent(); });
 fetch('/api/log').then(r => r.json()).then(l => { logs = l; renderLog(); });
 connectSse();
